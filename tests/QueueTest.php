@@ -56,4 +56,25 @@ class QueueTest__Job extends Job {
     public function __invoke() {
         return true;
     }
+
+    /**
+     * @return \JuriyPanasevich\BJobs\Interfaces\IJob
+     */
+    public function find() {
+        return $this;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function save() {
+        return true;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function delete() {
+        return true;
+    }
 }
