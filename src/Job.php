@@ -6,7 +6,9 @@
 namespace JuriyPanasevich\BJobs;
 
 
-abstract class Job {
+use JuriyPanasevich\BJobs\Interfaces\IJob;
+
+abstract class Job implements IJob {
 
     abstract public function __invoke();
 }
