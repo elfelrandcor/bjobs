@@ -1,4 +1,5 @@
 <?php
+use JuriyPanasevich\BJobs\Interfaces\JobInterface;
 use JuriyPanasevich\BJobs\Job;
 use JuriyPanasevich\BJobs\Queue;
 
@@ -14,39 +15,22 @@ class QueueTest extends PHPUnit_Framework_TestCase {
 
         $this->markTestIncomplete();
     }
-
 }
 
 class QueueTest__Queue extends Queue {
 
     /**
-     * @return \JuriyPanasevich\BJobs\Interfaces\IQueue
+     * @return \JuriyPanasevich\BJobs\Interfaces\JobInterface
      */
-    public function find() {
-        return $this;
+    public function pop() {
+        return new QueueTest__Job();
     }
 
     /**
-     * @return boolean
+     * @param \JuriyPanasevich\BJobs\Interfaces\JobInterface $job
+     * @return bool
      */
-    public function save() {
-        return true;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function delete() {
-        return true;
-    }
-
-    /**
-     * @param callable $job
-     * @param mixed $data
-     * @param mixed $name
-     * @return boolean
-     */
-    public function push($job, $data = null, $name = null) {
+    public function remove(JobInterface $job) {
         return true;
     }
 }
@@ -54,27 +38,6 @@ class QueueTest__Queue extends Queue {
 class QueueTest__Job extends Job {
 
     public function __invoke() {
-        return true;
-    }
-
-    /**
-     * @return \JuriyPanasevich\BJobs\Interfaces\IJob
-     */
-    public function find() {
-        return $this;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function save() {
-        return true;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function delete() {
         return true;
     }
 }
