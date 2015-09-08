@@ -7,6 +7,7 @@ namespace JuriyPanasevich\BJobs;
 
 use JuriyPanasevich\BJobs\Exception\JobException;
 use JuriyPanasevich\BJobs\Exception\WorkerException;
+use JuriyPanasevich\Logger\Logger;
 
 class QueueWorker {
 
@@ -14,12 +15,13 @@ class QueueWorker {
     protected $sleep;
     protected $maxTries;
 
+    /** @var Logger */
     private $logger;
 
     /** @var Queue */
     private $queue;
 
-    public function __construct(Queue $queue, $logger) {
+    public function __construct(Queue $queue, Logger $logger) {
         $this->setQueue($queue);
         $this->setLogger($logger);
     }
