@@ -5,13 +5,10 @@
 
 namespace JuriyPanasevich\BJobs;
 
-use JuriyPanasevich\BJobs\Exception\QueueException;
-use JuriyPanasevich\BJobs\Interfaces\JobInterface;
 use JuriyPanasevich\BJobs\Interfaces\QueueInterface;
 
 abstract class Queue implements QueueInterface {
-    protected $name;
-    protected $data;
+    protected $name, $data;
 
     /**
      * @param string $name
@@ -23,18 +20,6 @@ abstract class Queue implements QueueInterface {
         $this->setName($name)
             ->setData($data);
         return $this->push($job);
-    }
-
-    /**
-     * @param JobInterface $job
-     * @return bool
-     * @throws QueueException
-     */
-    public function push(JobInterface $job) {
-        if (!$this->getName()) {
-            throw new QueueException('Cannot push into nameless queue');
-        }
-        return true;
     }
 
     /**
