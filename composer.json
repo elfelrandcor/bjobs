@@ -6,7 +6,8 @@
         "php": ">=5.4.0",
         "symfony/process": "2.6.*",
         "cilex/cilex": "1.*",
-        "elfelrandcor/logger": "dev-master"
+        "elfelrandcor/logger": "dev-master",
+        "predis/predis": "1.*"
     },
     "repositories": [
       {
