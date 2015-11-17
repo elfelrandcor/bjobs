@@ -11,7 +11,7 @@ use JuriyPanasevich\Logger\Logger;
 
 class QueueWorker {
 
-    protected $name;
+    protected $delay;
     protected $sleep;
     protected $maxTries;
 
@@ -26,19 +26,25 @@ class QueueWorker {
         $this->setLogger($logger);
     }
 
-    public function run($name, $memory = 128, $sleep = 3, $maxTries = 0) {
-        $this->setName($name);
-        $this->setSleep($sleep);
+    public function run($delay = 2, $memory = 128, $sleep = 3, $maxTries = 0) {
         $this->setMaxTries($maxTries);
-        try {
-            if ($job = $this->pop()) {
-                $this->process($job);
+        $this->setDelay($delay);
+
+        while(true) {
+            $job = false;
+            try {
+                if ($job = $this->pop()) {
+                    $this->process($job);
+                }
+            } catch (\Exception $e) {
+                $this->logError($e->getMessage());
             }
-        } catch (\Exception $e) {
-            $this->logError($e->getMessage());
-        }
-        if ($this->memoryExceeded($memory)) {
-            $this->stop();
+            if ($this->memoryExceeded($memory)) {
+                $this->stop();
+            }
+            if (!$job) {
+                sleep($sleep);
+            }
         }
     }
 
@@ -76,6 +82,9 @@ class QueueWorker {
                 $this->logError(sprintf('Превышено количество попыток выполнения %s', $maxTries));
                 return false;
             }
+            $date = $job->getDateRelease();
+            $date->add(new \DateInterval(sprintf('PT%sS', $this->getDelay())));
+            $job->setDateRelease($date);
             if ($this->getQueue()->push($job)) {
                 $this->log('Задача поставлена в очередь на повторение');
             }
@@ -121,34 +130,6 @@ class QueueWorker {
     }
 
     /**
-     * @return mixed
-     */
-    public function getSleep() {
-        return $this->sleep;
-    }
-
-    /**
-     * @param mixed $sleep
-     */
-    public function setSleep($sleep) {
-        $this->sleep = $sleep;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getName() {
-        return $this->name;
-    }
-
-    /**
-     * @param mixed $name
-     */
-    public function setName($name) {
-        $this->name = $name;
-    }
-
-    /**
      * @param mixed $logger
      */
     private function setLogger($logger) {
@@ -168,5 +149,16 @@ class QueueWorker {
 
     protected function getLogger() {
         return $this->logger;
+    }
+
+    private function setDelay($delay) {
+        $this->delay = $delay;
+    }
+
+    /**
+     * @return integer
+     */
+    public function getDelay() {
+        return $this->delay;
     }
 }
