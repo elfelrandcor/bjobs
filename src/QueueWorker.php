@@ -26,7 +26,7 @@ class QueueWorker {
         $this->setLogger($logger);
     }
 
-    public function run($delay = 2, $memory = 128, $sleep = 3, $maxTries = 0) {
+    public function run($delay, $memory, $sleep, $maxTries) {
         $this->setMaxTries($maxTries);
         $this->setDelay($delay);
 

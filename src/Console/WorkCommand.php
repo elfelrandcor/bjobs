@@ -5,7 +5,7 @@
 
 namespace JuriyPanasevich\BJobs\Console;
 
-use JuriyPanasevich\BJobs\Journal\QueueJournal;
+use JuriyPanasevich\BJobs\Journal\QueueFileJournal;
 use JuriyPanasevich\BJobs\QueueWorker;
 use JuriyPanasevich\BJobs\RedisQueue;
 use JuriyPanasevich\Logger\Logger;
@@ -21,10 +21,10 @@ class WorkCommand extends Command {
             ->setName('work')
             ->setDescription('Run worker')
             ->addOption('queue', null, InputOption::VALUE_OPTIONAL, 'Queue name', 'application')
-            ->addOption('delay', null, InputOption::VALUE_OPTIONAL, 'delay')
-            ->addOption('memory', null, InputOption::VALUE_OPTIONAL, 'memory limit')
-            ->addOption('sleep', null, InputOption::VALUE_OPTIONAL, 'sec to sleep')
-            ->addOption('tries', null, InputOption::VALUE_OPTIONAL, 'maximum tries')
+            ->addOption('delay', null, InputOption::VALUE_OPTIONAL, 'delay', 2)
+            ->addOption('memory', null, InputOption::VALUE_OPTIONAL, 'memory limit', 128)
+            ->addOption('sleep', null, InputOption::VALUE_OPTIONAL, 'sec to sleep', 3)
+            ->addOption('tries', null, InputOption::VALUE_OPTIONAL, 'maximum tries', 0)
             ;
     }
 
@@ -32,8 +32,9 @@ class WorkCommand extends Command {
         $output->writeln('Start process...');
         $queue = new RedisQueue($input->getOption('queue'));
 
-        $journal = new QueueJournal();
+        $journal = new QueueFileJournal();
         $journal->setEntity($queue);
+        $journal->setStorage(__DIR__ . '/../logs/queue.log');
 
         $logger = new Logger($journal);
 
