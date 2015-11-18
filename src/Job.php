@@ -16,6 +16,17 @@ abstract class Job implements JobInterface {
     abstract public function __invoke();
 
     /**
+     * @return \DateTime
+     */
+    abstract public function getDateRelease();
+
+    /**
+     * @param \DateTime $date
+     * @return mixed
+     */
+    abstract public function setDateRelease($date);
+
+    /**
      * @return $this
      */
     public function incrementTries() {
