@@ -1,10 +1,9 @@
 <?php
+require_once __DIR__ . '/../vendor/autoload.php';
+
 use JuriyPanasevich\BJobs\Interfaces\JobInterface;
 use JuriyPanasevich\BJobs\Job;
-use JuriyPanasevich\BJobs\Journal\QueueJournal;
 use JuriyPanasevich\BJobs\Queue;
-use JuriyPanasevich\BJobs\QueueWorker;
-use JuriyPanasevich\Logger\Logger;
 
 /**
  * @author Juriy Panasevich <juriy.panasevich@gmail.com>
@@ -15,48 +14,80 @@ class QueueTest extends PHPUnit_Framework_TestCase {
     public function testPush() {
         $queue = new QueueTest__Queue();
         $this->assertEquals(true, $queue->pushOn('test', new QueueTest__Job()));
+        $this->assertEquals(true, $queue->pushOn('test', new QueueTest__Job()));
 
-        $queue = new QueueTest__Queue('test');
+        $this->assertEquals(2, count($queue->jobs));
+    }
 
-        $journal = new QueueJournal();
-        $journal->setEntity($queue);
+    public function testStoreScalarParameters() {
+        $queue = new QueueTest__Queue();
+        $job = new QueueTest__Job(1, 'string', 3);
+        $this->assertEquals(true, $queue->pushOn('test', $job));
 
-        $logger = new Logger($journal);
+        /** @var QueueTest__Job $job */
+        $job = $queue->pop();
+        $this->assertEquals(1, $job->getPublic());
+        $this->assertEquals('string', $job->getProtected());
+        $this->assertEquals(null, $job->getPrivate()); //приватные не сохраняем
+    }
 
-//        $worker = new QueueWorker($queue, $logger);
-//        $worker->run();
+    public function testStoreDTO() {
+        $queue = new QueueTest__Queue();
+        $params = new \JuriyPanasevich\BJobs\QueueJobParamsObject();
+        $params->addParam('test', 'test')->addParam('test2', true);
 
-        $this->markTestIncomplete();
+        $job = new QueueTest__Job($params);
+        $this->assertEquals(true, $queue->pushOn('test', $job));
+
+        /** @var QueueTest__Job $job */
+        $job = $queue->pop();
+        /** @var \JuriyPanasevich\BJobs\QueueJobParamsObject $restored */
+        $restored = $job->getPublic();
+        $this->assertTrue($restored instanceof \JuriyPanasevich\BJobs\QueueJobParamsObject);
+        $this->assertEquals('test', $restored->getParam('test'));
+        $this->assertEquals(true, $restored->getParam('test2'));
+    }
+
+    public function testExecute() {
+        $queue = new QueueTest__Queue();
+        $params = new \JuriyPanasevich\BJobs\QueueJobParamsObject();
+        $params->addParam('test', 'test')->addParam('test2', true);
+
+        $job = new QueueTest__Job($params);
+        $queue->pushOn('test', $job);
+        $job = $queue->pop();
+
+        $this->assertEquals(true, $job());
     }
 }
 
 class QueueTest__Queue extends Queue {
 
-    /**
-     * @return \JuriyPanasevich\BJobs\Interfaces\JobInterface
-     */
-    public function pop() {
-        return new QueueTest__Job();
-    }
+    public $jobs = [];
 
-    /**
-     * @param \JuriyPanasevich\BJobs\Interfaces\JobInterface $job
-     * @return bool
-     */
-    public function remove(JobInterface $job) {
+    public function push(JobInterface $job) : bool {
+        $this->jobs[] = json_encode($this->serializeJobToArray($job));
         return true;
     }
 
-    /**
-     * @param JobInterface $job
-     * @return boolean
-     */
-    public function push(JobInterface $job) {
-        return true;
+    public function pop() : JobInterface {
+        $job = array_pop($this->jobs);
+        $job = json_decode($job, true);
+        return $this->restoreJob($job);
     }
 }
 
 class QueueTest__Job extends Job {
+
+    public $public;
+    protected $protected;
+    private $private;
+
+    public function __construct($public = null, $protected = null, $private = null) {
+        $this->public = $public;
+        $this->protected = $protected;
+        $this->private = $private;
+    }
 
     public function __invoke() {
         return true;
@@ -68,5 +99,26 @@ class QueueTest__Job extends Job {
 
     public function setDateRelease($date) {
         return $this;
+    }
+
+    /**
+     * @return null
+     */
+    public function getProtected() {
+        return $this->protected;
+    }
+
+    /**
+     * @return null
+     */
+    public function getPrivate() {
+        return $this->private;
+    }
+
+    /**
+     * @return null
+     */
+    public function getPublic() {
+        return $this->public;
     }
 }
