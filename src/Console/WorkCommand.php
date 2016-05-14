@@ -7,7 +7,8 @@ namespace JuriyPanasevich\BJobs\Console;
 
 use JuriyPanasevich\BJobs\Journal\QueueFileJournal;
 use JuriyPanasevich\BJobs\QueueWorker;
-use JuriyPanasevich\BJobs\RedisQueue;
+use JuriyPanasevich\BJobs\Redis\Config;
+use JuriyPanasevich\BJobs\Redis\RedisQueue;
 use JuriyPanasevich\Logger\Logger;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -30,7 +31,10 @@ class WorkCommand extends Command {
 
     protected function execute(InputInterface $input, OutputInterface $output) {
         $output->writeln('Start process...');
-        $queue = new RedisQueue($input->getOption('queue'));
+        $config = new Config();
+        $config->setName($input->getOption('queue'));
+        
+        $queue = new RedisQueue($config);
 
         $journal = new QueueFileJournal();
         $journal->setEntity($queue);
