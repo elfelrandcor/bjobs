@@ -7,22 +7,8 @@ namespace JuriyPanasevich\BJobs\Interfaces;
 
 
 interface QueueInterface {
-
-    /**
-     * @param JobInterface $job
-     * @return boolean
-     */
-    public function push(JobInterface $job);
-
-    /**
-     * @return JobInterface
-     */
-    public function pop();
-
-    /**
-     * @param JobInterface $job
-     * @return bool
-     */
-    public function remove(JobInterface $job);
-
+    
+    public function push(JobInterface $job) : bool ;
+    
+    public function pop() : JobInterface;
 }
