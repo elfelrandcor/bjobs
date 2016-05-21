@@ -6,7 +6,7 @@
 namespace JuriyPanasevich\BJobs;
 
 
-class QueueJobParamsObject {
+class ParamsObject {
 
     protected $_params = [];
 

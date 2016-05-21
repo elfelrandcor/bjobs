@@ -33,7 +33,7 @@ class QueueTest extends PHPUnit_Framework_TestCase {
 
     public function testStoreDTO() {
         $queue = new QueueTest__Queue();
-        $params = new \JuriyPanasevich\BJobs\QueueJobParamsObject();
+        $params = new \JuriyPanasevich\BJobs\ParamsObject();
         $params->addParam('test', 'test')->addParam('test2', true);
 
         $job = new QueueTest__Job($params);
@@ -41,16 +41,16 @@ class QueueTest extends PHPUnit_Framework_TestCase {
 
         /** @var QueueTest__Job $job */
         $job = $queue->pop();
-        /** @var \JuriyPanasevich\BJobs\QueueJobParamsObject $restored */
+        /** @var \JuriyPanasevich\BJobs\ParamsObject $restored */
         $restored = $job->getPublic();
-        $this->assertTrue($restored instanceof \JuriyPanasevich\BJobs\QueueJobParamsObject);
+        $this->assertTrue($restored instanceof \JuriyPanasevich\BJobs\ParamsObject);
         $this->assertEquals('test', $restored->getParam('test'));
         $this->assertEquals(true, $restored->getParam('test2'));
     }
 
     public function testExecute() {
         $queue = new QueueTest__Queue();
-        $params = new \JuriyPanasevich\BJobs\QueueJobParamsObject();
+        $params = new \JuriyPanasevich\BJobs\ParamsObject();
         $params->addParam('test', 'test')->addParam('test2', true);
 
         $job = new QueueTest__Job($params);

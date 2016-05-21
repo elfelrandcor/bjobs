@@ -52,7 +52,7 @@ abstract class Queue implements QueueInterface {
             if (is_scalar($paramValue)) {
                 $props[$reflectionProperty->getName()] = $paramValue;
             }
-            if ($paramValue instanceof QueueJobParamsObject) {
+            if ($paramValue instanceof ParamsObject) {
                 $props[$reflectionProperty->getName()] = ['className' => get_class($paramValue), 'serialized' => serialize($paramValue)];
             }
             if (!$props[$reflectionProperty->getName()]) {
@@ -77,12 +77,12 @@ abstract class Queue implements QueueInterface {
 
                     if (is_array($value)
                         && array_key_exists('className', $value)
-                        && (is_subclass_of($value['className'], 'JuriyPanasevich\BJobs\QueueJobParamsObject') || $value['className'] === 'JuriyPanasevich\BJobs\QueueJobParamsObject')) {
+                        && (is_subclass_of($value['className'], 'JuriyPanasevich\BJobs\ParamsObject') || $value['className'] === 'JuriyPanasevich\BJobs\QueueJobParamsObject')) {
 
                         if (!array_key_exists('serialized', $value)) {
                             throw new QueueException('Нет данных сериализации DTO-объекта');
                         }
-                        /** @var QueueJobParamsObject $object */
+                        /** @var ParamsObject $object */
                         $object = unserialize($value['serialized']);
                         $value = $object;
                     }
