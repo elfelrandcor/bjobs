@@ -6,6 +6,7 @@
 namespace JuriyPanasevich\BJobs\Console;
 
 use JuriyPanasevich\BJobs\Journal\QueueFileJournal;
+use JuriyPanasevich\BJobs\QueueRunParams;
 use JuriyPanasevich\BJobs\QueueWorker;
 use JuriyPanasevich\BJobs\Redis\Config;
 use JuriyPanasevich\BJobs\Redis\RedisQueue;
@@ -42,6 +43,11 @@ class WorkCommand extends Command {
         $logger = new Logger($journal);
 
         $worker = new QueueWorker($queue, $logger);
-        $worker->run($input->getOption('delay'), $input->getOption('memory'), $input->getOption('sleep'), $input->getOption('tries'));
+        $runParams = new QueueRunParams();
+        $runParams->setDelay($input->getOption('delay'));
+        $runParams->setMemory($input->getOption('memory'));
+        $runParams->setSleep($input->getOption('sleep'));
+        $runParams->setMaxTries($input->getOption('tries'));
+        $worker->run($runParams);
     }
 }

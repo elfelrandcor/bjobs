@@ -12,8 +12,9 @@ use JuriyPanasevich\Logger\Logger;
 class QueueWorker {
 
     protected $delay;
-    protected $sleep;
     protected $maxTries;
+    /** @var  QueueRunParams */
+    protected $params;
 
     /** @var Logger */
     private $logger;
@@ -26,9 +27,8 @@ class QueueWorker {
         $this->setLogger($logger);
     }
 
-    public function run($delay, $memory, $sleep, $maxTries) {
-        $this->setMaxTries($maxTries);
-        $this->setDelay($delay);
+    public function run(QueueRunParams $params) {
+        $this->setParams($params);
 
         while(true) {
             $job = false;
@@ -39,11 +39,11 @@ class QueueWorker {
             } catch (\Exception $e) {
                 $this->logError($e->getMessage());
             }
-            if ($this->memoryExceeded($memory)) {
+            if ($this->memoryExceeded($this->params->getMemory())) {
                 $this->stop();
             }
             if (!$job) {
-                sleep($sleep);
+                sleep($this->params->getSleep());
             }
         }
     }
@@ -65,16 +65,12 @@ class QueueWorker {
         return $job;
     }
 
-    /**
-     * @param Job $job
-     * @return bool
-     */
-    public function process(Job $job) {
+    public function process(Job $job) : bool {
         try {
             $job();
         } catch (JobException $e) {
             $this->logError($e->getMessage());
-            if (!$maxTries = $this->getMaxTries()) {
+            if (!$maxTries = $this->params->getMaxTries()) {
                 return true;
             }
             $job->incrementTries();
@@ -83,7 +79,7 @@ class QueueWorker {
                 return false;
             }
             $date = $job->getDateRelease();
-            $date->add(new \DateInterval(sprintf('PT%sS', $this->getDelay())));
+            $date->add(new \DateInterval(sprintf('PT%sS', $this->params->getDelay())));
             $job->setDateRelease($date);
             if ($this->getQueue()->push($job)) {
                 $this->log('Задача поставлена в очередь на повторение');
@@ -115,50 +111,26 @@ class QueueWorker {
         $this->getLogger()->log($message);
     }
 
-    /**
-     * @return mixed
-     */
-    public function getMaxTries() {
-        return $this->maxTries;
-    }
-
-    /**
-     * @param mixed $maxTries
-     */
-    public function setMaxTries($maxTries) {
-        $this->maxTries = $maxTries;
-    }
-
-    /**
-     * @param mixed $logger
-     */
-    private function setLogger($logger) {
+    private function setLogger(Logger $logger) {
         $this->logger = $logger;
+        return $this;
     }
 
-    /**
-     * @param Queue $queue
-     */
-    private function setQueue($queue) {
-        $this->queue = $queue;
-    }
-
-    protected function getQueue() {
-        return $this->queue;
-    }
-
-    protected function getLogger() {
+    protected function getLogger() : Logger {
         return $this->logger;
     }
 
-    private function setDelay($delay) {
-        $this->delay = $delay;
+    private function setQueue(Queue $queue) {
+        $this->queue = $queue;
+        return $this;
     }
 
-    /**
-     * @return integer
-     */
-    public function getDelay() {
-        return $this->delay;
+    protected function getQueue() : Queue {
+        return $this->queue;
+    }
+
+    public function setParams(QueueRunParams $params) {
+        $this->params = $params;
+        return $this;
     }
 }
