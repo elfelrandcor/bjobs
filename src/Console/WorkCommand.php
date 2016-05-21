@@ -31,8 +31,7 @@ class WorkCommand extends Command {
 
     protected function execute(InputInterface $input, OutputInterface $output) {
         $output->writeln('Start process...');
-        $config = new Config();
-        $config->setName($input->getOption('queue'));
+        $config = new Config($input->getOption('queue'));
         
         $queue = new RedisQueue($config);
 

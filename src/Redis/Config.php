@@ -6,61 +6,62 @@
 namespace JuriyPanasevich\BJobs\Redis;
 
 
-class Config {
+use JuriyPanasevich\BJobs\ParamsObject;
 
-    protected
-        $name,
-        $scheme = 'tcp',
-        $host = '127.0.0.1',
-        $port = 6379,
-        $options = []
-    ;
+class Config extends ParamsObject {
 
-    public function getName() : string {
-        return $this->name;
+    public function __construct($name) {
+        $this->setParams([
+            'name' => $name,
+            'scheme' => 'tcp',
+            'host' => '127.0.0.1',
+            'port' => 6379,
+            'options' => [],
+        ]);
     }
 
+    public function getName() : string {
+        return $this->getParam('name');
+    }
 
     public function setName(string $name) {
-        $this->name = $name;
+        $this->addParam('name', $name);
         return $this;
     }
 
     public function getScheme() : string {
-        return $this->scheme;
+        return $this->getParam('scheme');
     }
 
     public function setScheme(string $scheme) {
-        $this->scheme = $scheme;
+        $this->addParam('scheme', $scheme);
         return $this;
     }
-
-    /**
-     * @return string
-     */
+    
     public function getHost() : string {
-        return $this->host;
+        return $this->getParam('host');
     }
 
     public function setHost(string $host) {
-        $this->host = $host;
+        $this->addParam('host', $host);
         return $this;
     }
 
     public function getPort() : integer {
-        return $this->port;
+        return $this->getParam('port');
     }
     
     public function setPort(integer $port) {
-        $this->port = $port;
+        $this->addParam('port', $port);
         return $this;
     }
     
     public function getOptions() : array {
-        return $this->options;
+        return $this->getParam('options');
     }
     
     public function setOptions(array $options) {
-        $this->options = $options;
+        $this->addParam('options', $options);
+        return $this;
     }
 }
