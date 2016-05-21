@@ -8,18 +8,13 @@ namespace JuriyPanasevich\BJobs\Redis;
 use JuriyPanasevich\BJobs\Exception\QueueException;
 use JuriyPanasevich\BJobs\Interfaces\JobInterface;
 use JuriyPanasevich\BJobs\Queue;
-use Predis\Client;
 
 class RedisQueue extends Queue {
 
-    protected $client;
+    protected $storage;
 
     public function __construct(Config $config) {
-        $this->client = new Client([
-            'scheme' => $config->getScheme(),
-            'host'   => $config->getHost(),
-            'port'   => $config->getPort(),
-        ], $config->getOptions());
+        $this->storage = new Storage($config);
         $this->setName($config->getName());
     }
 
@@ -27,15 +22,10 @@ class RedisQueue extends Queue {
         if (!$this->getName()) {
             throw new QueueException('Cannot push into nameless queue');
         }
-        $value = $this->serializeJobToArray($job);
-        $value = json_encode($value);
-        return (boolean)$this->client->rpush($this->getName(), [$value]);
+        return $this->storage->store($this->getName(), $this->storage->serialize($job));
     }
 
     public function pop() : JobInterface {
-        $stored = $this->client->lpop($this->getName());
-        $stored = json_decode($stored, true);
-
-        return $this->restoreJob($stored);
+        return $this->storage->unserialize($this->storage->get($this->getName()));
     }
 }
