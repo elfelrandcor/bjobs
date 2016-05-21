@@ -15,7 +15,7 @@ class Config extends ParamsObject {
             'name' => $name,
             'scheme' => 'tcp',
             'host' => '127.0.0.1',
-            'port' => 6379,
+            'port' => '6379',
             'options' => [],
         ]);
     }
@@ -47,11 +47,11 @@ class Config extends ParamsObject {
         return $this;
     }
 
-    public function getPort() : integer {
+    public function getPort() : string {
         return $this->getParam('port');
     }
     
-    public function setPort(integer $port) {
+    public function setPort(string $port) {
         $this->addParam('port', $port);
         return $this;
     }
