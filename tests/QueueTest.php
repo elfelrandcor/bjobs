@@ -64,16 +64,20 @@ class QueueTest extends PHPUnit_Framework_TestCase {
 class QueueTest__Queue extends Queue {
 
     public $jobs = [];
+    protected $storage;
+
+    public function __construct() {
+        $this->storage = new QueueTest__Storage(new \JuriyPanasevich\BJobs\Redis\Config('test'));
+    }
 
     public function push(JobInterface $job) : bool {
-        $this->jobs[] = json_encode($this->serializeJobToArray($job));
+        $this->jobs[] = $this->storage->serialize($job);
         return true;
     }
 
     public function pop() : JobInterface {
         $job = array_pop($this->jobs);
-        $job = json_decode($job, true);
-        return $this->restoreJob($job);
+        return $this->storage->unserialize($job);
     }
 }
 
@@ -121,4 +125,8 @@ class QueueTest__Job extends Job {
     public function getPublic() {
         return $this->public;
     }
+}
+
+class QueueTest__Storage extends \JuriyPanasevich\BJobs\Redis\Storage {
+
 }
