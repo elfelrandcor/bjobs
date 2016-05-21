@@ -36,10 +36,12 @@ class WorkCommand extends Command {
         
         $queue = new RedisQueue($config);
 
-        $journal = new QueueFileJournal();
+        $journal = new QueueFileJournal(__DIR__ . '/../logs/journal.db');
         $journal->setEntity($queue);
-        $journal->setStorage(__DIR__ . '/../logs/queue.log');
-
+        if (!$journal->find()) {
+            $journal->save();
+        }
+        
         $logger = new Logger($journal);
 
         $worker = new QueueWorker($queue, $logger);
