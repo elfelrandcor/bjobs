@@ -6,7 +6,8 @@
 namespace JuriyPanasevich\BJobs\Journal;
 
 
-use JuriyPanasevich\Logger\Journal\AbstractJournal;
+use JuriyPanasevich\Logger\Exceptions\JournalException;
+use JuriyPanasevich\Logger\Interfaces\JournalInterface;
 use JuriyPanasevich\Logger\Journal\AbstractJournalLog;
 
 class QueueFileJournalLog extends AbstractJournalLog {
@@ -22,7 +23,10 @@ class QueueFileJournalLog extends AbstractJournalLog {
         return $this->journal;
     }
 
-    public function setJournal(AbstractJournal $journal) {
+    public function setJournal(JournalInterface $journal) {
+        if (!$journal instanceof QueueFileJournal) {
+            throw new JournalException(sprintf('Передан неверный объект журнала: `%s`', get_class($journal)));
+        }
         $this->journal = $journal;
     }
 
